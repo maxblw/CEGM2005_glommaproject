@@ -233,13 +233,18 @@ def plot_all(df, savefig=False, dropna=True):
     if dropna:
         df = df.dropna()
     num_plots = df.shape[1]
-    fig, axes = plt.subplots(num_plots, 1, figsize=(10, num_plots * 3), sharex=True)
+    fig, axes = plt.subplots(num_plots, 1, figsize=(10, num_plots * 3))
     for i, column in enumerate(df.columns):
         axes[i].plot(df.index, df[column], color='black', linewidth=1)
         axes[i].set_title(f"{column} over Time")
         axes[i].set_ylabel(column)
         axes[i].grid(True)
-        axes[i].set_xlim([df.index.min(), df.index.max()])
+        if not dropna:
+            xmin = df[column].dropna().index.min()
+            xmax = df[column].dropna().index.max()
+            axes[i].set_xlim([xmin, xmax])
+        else:
+            axes[i].set_xlim([df.index.min(), df.index.max()])
     axes[-1].set_xlabel("Date")
     plt.tight_layout()
     if savefig:
