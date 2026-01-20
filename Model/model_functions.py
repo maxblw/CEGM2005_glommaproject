@@ -31,14 +31,14 @@ def conditionalize(data, model, cond_vars, cond_vals, tol=0.01, n_samples=1000):
         print(f"Length samples after conditioning: {samples.shape[0]}")
     if samples.shape[0] == 0:
         print("No samples found for the given conditioning values and tolerance.")
-        sel_non_un = np.zeros((0, data.shape[1]-len(cond_vars)))
+        return np.array([[0]]) 
     # to variable space
     else:
         columns = [i for i in range(len(data.columns)) if i not in cond_vars]
         sel_non_un = np.empty_like(samples)
         sel_non_un = [eval_inverse_ecdf(data.iloc[:, col], samples[:, col]) for col in columns]
 
-    return sel_non_un
+    return np.array(sel_non_un)
 
 def plot_conditionalize(data, model, cond_var, cond_val, tol=0.01, n_samples=1000):
     import numpy as np
