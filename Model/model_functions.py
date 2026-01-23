@@ -19,7 +19,19 @@ def eval_inverse_ecdf(obs, x):
     inverted_ecdf = interp1d(ecdf_var[1], ecdf_var[0], fill_value="extrapolate")
     return inverted_ecdf(x)
 
-def conditionalize(data, model, cond_vars, cond_vals, tol=0.01, n_samples=1000):
+def sd_normal(data):
+    from scipy import stats
+    sd_data = stats.norm.ppf(data)
+    return sd_data
+
+def unity(data):
+    from scipy import stats
+    u_hat = data.copy()
+    for col in data.columns:
+        u_hat[col] = stats.rankdata(data[col]) / (len(data)+1)
+    return u_hat
+
+def conditionalize(data, model, cond_vars, cond_vals, tol=0.01, n_samples=1000, verbose=False):
     import numpy as np
 
     samples = np.array(model.simulate(n_samples))
@@ -28,9 +40,11 @@ def conditionalize(data, model, cond_vars, cond_vals, tol=0.01, n_samples=1000):
         idx = np.abs(samples[:, var] - unity_val) < tol
         # idx = idx.any(axis=1)
         samples = samples[idx]
-        print(f"Length samples after conditioning: {samples.shape[0]}")
+        if verbose:
+            print(f"Length samples after conditioning: {samples.shape[0]}")
     if samples.shape[0] == 0:
-        print("No samples found for the given conditioning values and tolerance.")
+        if verbose:
+            print("No samples found for the given conditioning values and tolerance.")
         return np.array([[0]]) 
     # to variable space
     else:
